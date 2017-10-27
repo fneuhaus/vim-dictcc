@@ -9,35 +9,41 @@ python3 sys.path.append(vim.eval('expand("<sfile>:h")'))
 " --------------------------------
 "  Function(s)
 " --------------------------------
-function! DictTranslate(word)
+function! DictTranslate(engine, word)
 python3 << endOfPython
 
-from dictcc import DictQuery
+from dicts import DictCCQuery, ThesaurusQuery
 
 def create_new_buffer(contents):
-    vim.command('rightbelow split dictcc')
+    vim.command('rightbelow split dicts')
     vim.command('normal! ggdG')
-    vim.command('setlocal filetype=dictcc')
+    vim.command('setlocal filetype=dicts')
     vim.command('call append(0, {0})'.format(contents))
     vim.command('setlocal readonly')
     vim.command('setlocal buftype=nowrite')
     vim.command('normal! gg')
     vim.command('map <buffer> q :close<CR>')
 
-create_new_buffer(DictQuery(vim.eval("a:word")).as_lines())
+engine = vim.eval("a:engine").lower()
+word = vim.eval("a:word").replace("\"", "")
+if engine in ['cc', 'dictcc']:
+    query = DictCCQuery(word)
+elif engine in ['t', 'th', 'thesaurus']:
+    query = ThesaurusQuery(word)
+create_new_buffer(query.as_lines())
 
 endOfPython
 endfunction
 
 
-function! DictTranslateWordUnderCursor()
+function! DictTranslateWordUnderCursor(engine)
   let word = expand("<cword>")
-  :call DictTranslate(word)
+  :call DictTranslate(a:engine, word)
 endfunction
 
 
 " --------------------------------
 "  Expose our commands to the user
 " --------------------------------
-command! DictCur call DictTranslateWordUnderCursor()
-command! -nargs=1 Dict call DictTranslate(<f-args>)
+command! -nargs=1 DictCur call DictTranslateWordUnderCursor(<f-args>)
+command! -nargs=* Dict call DictTranslate(<f-args>)
