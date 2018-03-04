@@ -44,19 +44,31 @@ class DictQuery(object):
         return self._parse_html()
 
     @property
+    def num_results(self):
+        return len(self.translations)
+
+    @property
     def response(self):
         if not hasattr(self, "_response"):
             try:
-                response = urllib.request.urlopen(self._request)
+                response = urllib.request.urlopen(self._request, timeout=2)
                 self._response = response.read().decode("utf-8")
             except urllib.error.HTTPError as e:
                 # Some pages return 404, when the word is not in their database
                 # for example Thesaurus
                 return None
             except urllib.error.URLError as e:
-                print("Error during dict request: {}".format(e.reason))
+                print("Error during dict request.")
                 return None
         return self._response
+
+    def get_entry(self, index):
+        if not self.translations or not index < len(self.translations):
+            return ''
+        if type(self.translations[index]) == tuple:
+            return self.translations[index][0]
+        else:
+            return self.translations[index]
 
     def as_lines(self):
         lines = [self.header]

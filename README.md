@@ -50,8 +50,8 @@ Engine could be for example cc for **dict.cc**:
 To make it more convenient to use commands for the different engines can easily be greated in your
 vimrc, e.g.
 ```vim
-command! -nargs=1 DictCC :Dict cc <f-args>
-command! -nargs=1 Thesaurus :Dict thesaurus <f-args>
+command! -nargs=1 DictCC :call DictTranslate("cc", <q-args>)
+command! -nargs=1 Thesaurus :call DictTranslate("thesaurus", <q-args>)
 ```
 
 The `DictCur [engine]` instead will query for the word currently under cursor, which is convenient to remap, e.g.
@@ -61,7 +61,8 @@ nnoremap <c-s> :DictCur cc<CR>
 ```
 Now **Ctrl-s** in `normal` and `insert` mode will invoke the translation query.
 
-The newly created `dicts` buffer can be closed by pressing the `q` key.
+The newly created `dicts` buffer can be closed by pressing the `q` key. The translation in the
+line where the cursor is located can be inserted into the current buffer by pressing `Enter`.
 
 ## Development
 vim-dicts is in an early stage of development and your help appreciated. Feel free to create issues and contribute PRs.

@@ -9,7 +9,15 @@ python3 sys.path.append(vim.eval('expand("<sfile>:h")'))
 " --------------------------------
 "  Function(s)
 " --------------------------------
-function! DictTranslate(engine, word)
+function! DictInsert()
+python3 << endOfPython
+index = vim.current.window.cursor[0] - 2
+vim.command('close')
+vim.command('normal a' + query.get_entry(index))
+endOfPython
+endfunction
+
+function! DictTranslate(engine, ...)
 python3 << endOfPython
 
 from dicts import DictCCQuery, ThesaurusQuery
@@ -23,14 +31,16 @@ def create_new_buffer(contents):
     vim.command('setlocal buftype=nowrite')
     vim.command('normal! gg')
     vim.command('map <buffer> q :close<CR>')
+    vim.command('map <buffer> <Enter> :call DictInsert()<CR>')
 
 engine = vim.eval("a:engine").lower()
-word = vim.eval("a:word").replace("\"", "")
+word = ' '.join(vim.eval("a:000"))
 if engine in ['cc', 'dictcc']:
     query = DictCCQuery(word)
 elif engine in ['t', 'th', 'thesaurus']:
     query = ThesaurusQuery(word)
-create_new_buffer(query.as_lines())
+if query.num_results > 0:
+    create_new_buffer(query.as_lines())
 
 endOfPython
 endfunction
