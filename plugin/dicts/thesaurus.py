@@ -45,10 +45,14 @@ class ThesaurusQuery(DictQuery):
                 return None
 
         translations_meta = list()
-        links = soup.select("#synonyms-0 div.filters ul li a")
+        synonyms_label = soup.find_all(text=re.compile('Synonyms for '))
+        if len(synonyms_label) == 0:
+            return []
+        links = synonyms_label[0].parent.parent.select('ul li>span')
         if links:
-            for a in links:
-                res = parse_a(a)
+            entries = len(links)
+            for i, a in enumerate(links):
+                res = (a.text, entries - i)
                 if res:
                     translations_meta.append(res)
         translations = [w[0] for w in sorted(translations_meta, key=lambda x: -x[1])]
